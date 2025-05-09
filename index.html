@@ -15,6 +15,86 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     
+    .voice-active {
+      animation: pulse-border 1.5s infinite;
+    }
+    
+    @keyframes pulse-border {
+      0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+      }
+    }
+    
+    .listening-indicator {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(15, 23, 42, 0.9);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .listening-indicator.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .listening-waves {
+      display: flex;
+      align-items: center;
+      height: 20px;
+    }
+    
+    .listening-wave {
+      width: 3px;
+      height: 100%;
+      margin: 0 1px;
+      border-radius: 1px;
+      background-color: #3b82f6;
+      animation: wave 1s ease-in-out infinite;
+    }
+    
+    .listening-wave:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .listening-wave:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    .listening-wave:nth-child(4) {
+      animation-delay: 0.6s;
+    }
+    
+    .listening-wave:nth-child(5) {
+      animation-delay: 0.8s;
+    }
+    
+    @keyframes wave {
+      0%, 100% {
+        height: 5px;
+      }
+      50% {
+        height: 20px;
+      }
+    }
+    
     .backdrop-blur {
       backdrop-filter: blur(8px);
     }
@@ -166,6 +246,14 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
           <input id="searchInput" type="text" placeholder="Search the multiverse..." class="search-input">
+          <button id="voiceSearchButton" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition-colors focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </button>
         </div>
         <button id="searchButton" class="search-button">Search</button>
       </div>
@@ -185,6 +273,18 @@
     </div>
   </div>
 
+  <!-- Voice listening indicator -->
+  <div id="listeningIndicator" class="listening-indicator">
+    <div class="listening-waves">
+      <div class="listening-wave"></div>
+      <div class="listening-wave"></div>
+      <div class="listening-wave"></div>
+      <div class="listening-wave"></div>
+      <div class="listening-wave"></div>
+    </div>
+    <span>Listening...</span>
+  </div>
+
   <!-- Results Page -->
   <div id="resultsPage" class="min-h-screen" style="display: none;">
     <!-- Sticky header -->
@@ -200,6 +300,14 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
           <input id="resultsSearchInput" type="text" placeholder="Search the multiverse..." class="search-input">
+          <button id="resultsVoiceSearchButton" class="absolute right-12 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition-colors focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </button>
           <svg id="resultsSearchButton" xmlns="http://www.w3.org/2000/svg" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-400 cursor-pointer hover:text-blue-300" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
@@ -416,7 +524,11 @@
 
     // Handle search action
     const handleSearch = () => {
-      const currentQuery = (searchInput.value || resultsSearchInput.value).trim();
+      // Check which input is being used
+      const isOnResultsPage = resultsPage.style.display !== 'none';
+      const currentInput = isOnResultsPage ? resultsSearchInput : searchInput;
+      const currentQuery = currentInput.value.trim();
+      
       if (!currentQuery) return;
       
       query = currentQuery;
@@ -459,6 +571,119 @@
       fetchResults(submittedQuery);
     };
 
+    // Voice search functionality
+    const voiceSearchButton = document.getElementById('voiceSearchButton');
+    const resultsVoiceSearchButton = document.getElementById('resultsVoiceSearchButton');
+    const listeningIndicator = document.getElementById('listeningIndicator');
+    let recognition;
+    let isListening = false;
+    
+    // Initialize speech recognition
+    const initSpeechRecognition = () => {
+      // Check browser support
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("Voice search is not supported in your browser. Try Chrome, Edge, or Safari.");
+        return false;
+      }
+      
+      // Create speech recognition instance
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      
+      // Configure recognition settings
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      // Set up recognition event handlers
+      recognition.onstart = () => {
+        isListening = true;
+        listeningIndicator.classList.add('visible');
+        const activeInput = document.activeElement === resultsSearchInput ? resultsSearchInput : searchInput;
+        activeInput.classList.add('voice-active');
+      };
+      
+      recognition.onend = () => {
+        isListening = false;
+        listeningIndicator.classList.remove('visible');
+        searchInput.classList.remove('voice-active');
+        resultsSearchInput.classList.remove('voice-active');
+      };
+      
+      recognition.onresult = (event) => {
+        const activeInput = document.activeElement === resultsSearchInput ? resultsSearchInput : searchInput;
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+          
+        activeInput.value = transcript;
+        
+        // Auto-submit if the person has stopped speaking for a moment
+        if (event.results[0].isFinal) {
+          setTimeout(() => {
+            if (transcript.trim() !== "") {
+              handleSearch();
+              stopVoiceSearch();
+            }
+          }, 1000);
+        }
+      };
+      
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        stopVoiceSearch();
+        
+        if (event.error === 'not-allowed') {
+          alert("Microphone access was denied. Please allow microphone access to use voice search.");
+        }
+      };
+      
+      return true;
+    };
+    
+    // Start voice search
+    const startVoiceSearch = (inputElement) => {
+      // Focus on the appropriate input
+      inputElement.focus();
+      
+      // Initialize recognition if not already done
+      if (!recognition && !initSpeechRecognition()) {
+        return;
+      }
+      
+      // Start recognition
+      try {
+        recognition.start();
+      } catch (error) {
+        // If already running, restart it
+        if (error.name === 'InvalidStateError') {
+          recognition.stop();
+          setTimeout(() => {
+            recognition.start();
+          }, 200);
+        } else {
+          console.error('Speech recognition error', error);
+        }
+      }
+    };
+    
+    // Stop voice search
+    const stopVoiceSearch = () => {
+      if (recognition && isListening) {
+        recognition.stop();
+      }
+    };
+    
+    // Toggle voice search
+    const toggleVoiceSearch = (inputElement) => {
+      if (isListening) {
+        stopVoiceSearch();
+      } else {
+        startVoiceSearch(inputElement);
+      }
+    };
+    
     // Event listeners
     searchButton.addEventListener('click', handleSearch);
     resultsSearchButton.addEventListener('click', handleSearch);
@@ -471,6 +696,18 @@
     resultsSearchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleSearch();
     });
+    
+    // Voice search button event listeners
+    voiceSearchButton.addEventListener('click', () => {
+      toggleVoiceSearch(searchInput);
+    });
+    
+    resultsVoiceSearchButton.addEventListener('click', () => {
+      toggleVoiceSearch(resultsSearchInput);
+    });
+    
+    // Stop voice search when clicking search button
+    searchButton.addEventListener('click', stopVoiceSearch);
     
     // Set up trending item clicks
     trendingItems.forEach(item => {
