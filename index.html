@@ -13,6 +13,7 @@
       background: linear-gradient(to bottom right, #0f172a, #1e293b);
       color: white;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow-x: hidden;
     }
     
     .voice-active {
@@ -108,7 +109,7 @@
     
     .search-input {
       padding-left: 48px;
-      background-color: #1e293b;
+      background-color: rgba(30, 41, 59, 0.8);
       border: 1px solid #334155;
       border-radius: 9999px;
       color: white;
@@ -116,10 +117,13 @@
       width: 100%;
       outline: none;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
     }
     
     .search-input:focus {
-      box-shadow: 0 0 0 2px #3b82f6;
+      box-shadow: 0 0 0 2px #3b82f6, 0 0 20px rgba(59, 130, 246, 0.4);
+      background-color: rgba(30, 41, 59, 0.95);
+      border-color: #3b82f6;
     }
     
     .search-button {
@@ -130,28 +134,76 @@
       font-size: 18px;
       border: none;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all 0.3s;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
     }
     
     .search-button:hover {
       background-color: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .search-button:active {
+      transform: translateY(1px);
+    }
+    
+    .search-button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      transition: transform 0.6s, opacity 0.6s;
+    }
+    
+    .search-button:hover::after {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
     }
     
     .result-card {
-      background-color: #0f172a;
+      background-color: rgba(15, 23, 42, 0.7);
       border: 1px solid #334155;
       border-radius: 16px;
       padding: 24px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s ease;
       display: block;
       color: inherit;
       text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
     }
     
     .result-card:hover {
-      transform: scale(1.02);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+    
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, #3b82f6, #60a5fa, #3b82f6);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s ease;
+    }
+    
+    .result-card:hover::before {
+      transform: scaleX(1);
     }
     
     .source-badge {
@@ -160,6 +212,8 @@
       border-radius: 4px;
       font-size: 12px;
       text-transform: uppercase;
+      font-weight: 500;
+      letter-spacing: 0.5px;
     }
     
     .card-title {
@@ -167,10 +221,12 @@
       font-weight: bold;
       margin-bottom: 4px;
       color: #93c5fd;
+      transition: color 0.2s;
     }
     
     .card-title:hover {
       text-decoration: underline;
+      color: #60a5fa;
     }
     
     .card-url {
@@ -185,6 +241,7 @@
       margin-top: 8px;
       color: #cbd5e1;
       font-size: 14px;
+      line-height: 1.6;
     }
     
     .results-grid {
@@ -209,7 +266,7 @@
     }
     
     .animate-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      animation: pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
     
     @keyframes pulse {
@@ -231,17 +288,89 @@
         opacity: 0;
       }
     }
+    
+    .globe {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      box-shadow: 0 0 60px rgba(59, 130, 246, 0.2);
+      opacity: 0.05;
+      background-image: 
+        radial-gradient(circle at center, transparent 0%, #0f172a 70%),
+        linear-gradient(0deg, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+      background-size: 100% 100%, 20% 20%;
+      animation: rotate 120s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .star {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      opacity: 0;
+      animation: twinkle var(--duration, 4s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    
+    @keyframes twinkle {
+      0%, 100% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      50% {
+        opacity: var(--opacity, 0.7);
+        transform: scale(1);
+      }
+    }
+
+    .trending-item {
+      transition: all 0.3s ease;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background-color: rgba(51, 65, 85, 0.3);
+      display: inline-block;
+    }
+
+    .trending-item:hover {
+      background-color: rgba(59, 130, 246, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .title-gradient {
+      background: linear-gradient(to right, #93c5fd, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .search-icon {
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus + .search-icon {
+      color: #3b82f6;
+    }
   </style>
 </head>
 <body>
   <!-- Landing Page -->
   <div id="landingPage" class="flex flex-col items-center justify-center px-4 min-h-screen">
     <div class="w-full max-w-4xl text-center">
-      <h1 class="text-4xl md:text-6xl font-bold mb-4">ExploreX Search</h1>
-      <p class="mb-10 text-lg text-gray-300">Discover the unexplored. Advanced AI-powered search built for the next generation.</p>
+      <h1 class="text-4xl md:text-6xl font-bold mb-4 title-gradient">ExploreX Search</h1>
+      <p class="mb-10 text-lg text-gray-300">Discover the unexplored. Search trusted sources. Explore privately.</p>
       <div class="flex flex-col sm:flex-row items-center gap-4">
         <div class="relative w-full sm:w-4/5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
@@ -259,17 +388,26 @@
       </div>
       <div class="mt-12 text-left">
         <h2 class="text-xl font-semibold mb-3 text-blue-400">Trending in ExploreX</h2>
-        <ul class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-300">
-          <li class="hover:text-white hover:underline cursor-pointer trending-item">Dark Matter Theories</li>
-          <li class="hover:text-white hover:underline cursor-pointer trending-item">X1 Timeline Collapse</li>
-          <li class="hover:text-white hover:underline cursor-pointer trending-item">AI Civilizations</li>
-          <li class="hover:text-white hover:underline cursor-pointer trending-item">Reality Folds</li>
-        </ul>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-300">
+          <div class="trending-item hover:text-white cursor-pointer">Dark Matter Theories</div>
+          <div class="trending-item hover:text-white cursor-pointer">X1 Timeline Collapse</div>
+          <div class="trending-item hover:text-white cursor-pointer">AI Civilizations</div>
+          <div class="trending-item hover:text-white cursor-pointer">Reality Folds</div>
+        </div>
       </div>
     </div>
+    <!-- Dynamic background elements -->
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-      <div class="absolute top-1/3 left-1/4 w-96 h-96 bg-blue-500 opacity-10 rounded-full filter blur-3xl animate-pulse"></div>
-      <div class="absolute bottom-10 right-1/4 w-80 h-80 bg-cyan-400 opacity-10 rounded-full filter blur-2xl animate-ping"></div>
+      <!-- Background gradients -->
+      <div class="absolute top-1/4 left-1/3 w-96 h-96 bg-blue-500 opacity-10 rounded-full filter blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-1/4 right-1/3 w-80 h-80 bg-cyan-400 opacity-10 rounded-full filter blur-2xl animate-ping"></div>
+      <div class="absolute top-2/3 left-1/4 w-64 h-64 bg-indigo-600 opacity-5 rounded-full filter blur-3xl" style="animation: pulse 7s ease-in-out infinite alternate;"></div>
+      
+      <!-- Globe effect -->
+      <div class="globe absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+      
+      <!-- Stars effect -->
+      <div id="starsContainer"></div>
     </div>
   </div>
 
@@ -288,14 +426,14 @@
   <!-- Results Page -->
   <div id="resultsPage" class="min-h-screen" style="display: none;">
     <!-- Sticky header -->
-    <div class="fixed top-0 left-0 w-full p-4 z-20 bg-opacity-80 backdrop-blur" style="background-color: rgba(15, 23, 42, 0.8); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <div class="fixed top-0 left-0 w-full p-4 z-20 bg-opacity-90 backdrop-blur" style="background-color: rgba(15, 23, 42, 0.8); box-shadow: 0 4px 20px -1px rgba(0, 0, 0, 0.2);">
       <div class="max-w-4xl mx-auto flex items-center">
-        <svg id="backButton" xmlns="http://www.w3.org/2000/svg" class="text-blue-400 cursor-pointer hover:text-blue-300 mr-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg id="backButton" xmlns="http://www.w3.org/2000/svg" class="text-blue-400 cursor-pointer hover:text-blue-300 mr-4 transition-colors" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="12" x2="5" y2="12"></line>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
         <div class="relative flex-grow">
-          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
@@ -308,7 +446,7 @@
               <line x1="8" y1="23" x2="16" y2="23"></line>
             </svg>
           </button>
-          <svg id="resultsSearchButton" xmlns="http://www.w3.org/2000/svg" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-400 cursor-pointer hover:text-blue-300" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg id="resultsSearchButton" xmlns="http://www.w3.org/2000/svg" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-400 cursor-pointer hover:text-blue-300 transition-colors" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
@@ -318,13 +456,25 @@
     
     <!-- Results -->
     <div class="pt-24 max-w-4xl mx-auto px-4 pb-20">
-      <h2 class="text-2xl font-semibold mb-2">Results for "<span id="submittedQueryText"></span>"</h2>
-      <p id="loadingText" class="text-gray-400 mb-6" style="display: none;">Loading results...</p>
+      <h2 class="text-2xl font-semibold mb-2">Results for "<span id="submittedQueryText" class="text-blue-400"></span>"</h2>
+      <p id="loadingText" class="text-gray-400 mb-6 flex items-center" style="display: none;">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Loading results...
+      </p>
       <p id="errorText" class="text-red-400 mb-6" style="display: none;"></p>
       <p id="resultsCount" class="text-gray-400 mb-6" style="display: none;"></p>
       
       <!-- Results Grid -->
       <div id="resultsGrid" class="results-grid"></div>
+    </div>
+    
+    <!-- Background elements for results page -->
+    <div class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
+      <div class="absolute top-1/3 right-1/4 w-64 h-64 bg-blue-600 opacity-5 rounded-full filter blur-3xl" style="animation: pulse 8s ease-in-out infinite;"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-80 h-80 bg-indigo-500 opacity-5 rounded-full filter blur-3xl" style="animation: pulse 10s ease-in-out infinite alternate;"></div>
     </div>
   </div>
 
@@ -350,6 +500,36 @@
     const resultsCount = document.getElementById('resultsCount');
     const resultsGrid = document.getElementById('resultsGrid');
     const trendingItems = document.querySelectorAll('.trending-item');
+    const starsContainer = document.getElementById('starsContainer');
+
+    // Create stars background
+    function createStars() {
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        // Random size between 1-3px
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // Random position
+        const top = Math.random() * 100;
+        const left = Math.random() * 100;
+        star.style.top = `${top}%`;
+        star.style.left = `${left}%`;
+        
+        // Random animation duration and delay
+        star.style.setProperty('--duration', `${Math.random() * 5 + 2}s`);
+        star.style.setProperty('--delay', `${Math.random() * 5}s`);
+        star.style.setProperty('--opacity', `${Math.random() * 0.7 + 0.3}`);
+        
+        starsContainer.appendChild(star);
+      }
+    }
+    
+    // Initialize stars
+    createStars();
 
     // Build API URLs
     const buildWikiApiUrl = (q) =>
